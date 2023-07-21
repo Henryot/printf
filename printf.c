@@ -1,109 +1,63 @@
+/* printf.c */
 #include "main.h"
-#include <unistd.h> /* For write */
+#include <stddef.h>
 
 /**
- * _putchar - Writes a character to stdout.
- * @c: The character to print.
+ * print_format - Prints a formatted string to stdout.
+ * @format: The format string containing the format specifiers.
+ * @args: The arguments list containing the values for the format specifiers.
  *
- * Return: On success, 1. On error, -1 is returned.
+ * Return: The number of characters printed (excluding the null byte).
  */
-int _putchar(char c)
+int print_format(const char *format, va_list args)
 {
-	return (write(1, &c, 1));
+    int printed_chars = 0;
+    int (*print_fn)(va_list);
+
+    while (*format)
+    {
+        if (*format == '%')
+        {
+            format++;
+            print_fn = NULL;
+
+            if (*format == 'c')
+                print_fn = print_char;
+            else if (*format == 's')
+                print_fn = print_string;
+            else if (*format == '%')
+                print_fn = print_percent;
+
+            if (print_fn)
+                printed_chars += print_fn(args);
+            else
+                printed_chars += _putchar('%');
+        }
+        else
+        {
+            printed_chars += _putchar(*format);
+        }
+
+        format++;
+    }
+
+    return printed_chars;
 }
 
 /**
- * print_char - Prints a single character.
- * @args: The argument list.
- *
- * Return: The number of characters printed.
- */
-int print_char(va_list args)
-{
-	char ch = va_arg(args, int);
-
-	return (_putchar(ch));
-}
-
-/**
- * print_string - Prints a string.
- * @args: The argument list.
- *
- * Return: The number of characters printed.
- */
-int print_string(va_list args)
-{
-	int printed_chars;
-	char *str_arg = va_arg(args, char *);
-
-	if (!str_arg)
-		str_arg = "(null)";
-
-	for (printed_chars = 0; *str_arg; printed_chars++)
-	{
-		_putchar(*str_arg);
-		str_arg++;
-	}
-	return (printed_chars);
-}
-
-/**
- * print_percent - Prints a percentage sign.
- * @args: The argument list.
- *
- * Return: The number of characters printed.
- */
-int print_percent(va_list args __attribute__((unused)))
-{
-	return (_putchar('%'));
-}
-
-/**
- * _printf - Custom implementation of printf.
- * @format: The format string.
+ * _printf - Prints a formatted string to stdout.
+ * @format: The format string containing the format specifiers.
  *
  * Return: The number of characters printed (excluding the null byte).
  */
 int _printf(const char *format, ...)
 {
-	int printed_chars = 0;
-	va_list args;
-	int (*print_fn)(va_list);
+    va_list args;
+    int printed_chars;
 
-	va_start(args, format);
+    va_start(args, format);
+    printed_chars = print_format(format, args);
+    va_end(args);
 
-	while (*format)
-	{
-		if (*format != '%')
-		{
-			printed_chars += _putchar(*format);
-		}
-		else
-		{
-			format++;
-			print_fn = NULL;
-
-			switch (*format)
-			{
-				case 'c':
-					print_fn = print_char;
-					break;
-				case 's':
-					print_fn = print_string;
-					break;
-				case '%':
-					print_fn = print_percent;
-					break;
-				default:
-					_putchar('%');
-					_putchar(*format);
-					printed_chars += 2;
-			}
-			if (print_fn)
-				printed_chars += print_fn(args);
-		}
-		format++;
-	}
-	va_end(args);
-	return (printed_chars);
+    return printed_chars;
 }
