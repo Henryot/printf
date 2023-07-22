@@ -1,7 +1,7 @@
 #include "main.h"
 #include "printf_helpers.h"
 #include <stdarg.h>
-#include <unistd.h>
+#include <unistd.h> // for the write function
 
 #define BUFFER_SIZE 1024
 
@@ -35,6 +35,12 @@ int _printf(const char *format, ...)
 			if (func != NULL)
 			{
 				int count = func->func(args, buffer + buffer_index, BUFFER_SIZE - buffer_index);
+				if (count < 0)
+				{
+					// Error occurred in a helper function
+					va_end(args);
+					return -1;
+				}
 				buffer_index += count;
 				printed_chars += count;
 			}
@@ -56,6 +62,7 @@ int _printf(const char *format, ...)
 			}
 		}
 
+		// Flush buffer if full
 		if (buffer_index >= BUFFER_SIZE - 1)
 		{
 			write(1, buffer, buffer_index);
@@ -63,6 +70,7 @@ int _printf(const char *format, ...)
 		}
 	}
 
+	// Flush any remaining characters in the buffer
 	if (buffer_index > 0)
 		write(1, buffer, buffer_index);
 
