@@ -1,8 +1,14 @@
-#include "main.h"
 #include "printf_helpers.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include "main.h"
 
+/**
+ * _printf - Custom printf function
+ * @format: The format string containing zero or more directives
+ *
+ * Return: The number of characters printed
+ */
 int _printf(const char *format, ...)
 {
 	va_list args;
@@ -37,5 +43,5 @@ int _printf(const char *format, ...)
 	}
 
 	va_end(args);
-	return printed_chars;
+	return (printed_chars);
 }
